@@ -7,7 +7,6 @@ for line in file:
     grid.append(row)
 
 XMAS = "MAS"
-
 ans = 0
 for row in range(len(grid) - len(XMAS) + 1):
     for col in range(len(grid[row]) - len(XMAS) + 1):
@@ -16,5 +15,4 @@ for row in range(len(grid) - len(XMAS) + 1):
         if diag_str2 == diag_str or diag_str2 == diag_str[::-1]:
             ans += diag_str.count(XMAS)
             ans += diag_str.count(XMAS[::-1])
-
 print (ans)
