@@ -13,9 +13,6 @@ for line in file:
     else:
         updates.append([int(x) for x in line.strip().split(",") if x.isnumeric()])
 
-print(orders)
-print(updates)
-
 dict_before = {}
 dict_after = {}
 
