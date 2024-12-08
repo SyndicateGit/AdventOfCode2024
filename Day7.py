@@ -9,9 +9,6 @@ for line in file:
 
 print(inputs)
 
-
-
-
 def check_test(numbers, total, index, curr):
     if index == len(numbers):
         if curr == total:
