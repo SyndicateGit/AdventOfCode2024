@@ -1,7 +1,7 @@
 import functools
 
 file = open("Day5.txt", "r")
-test_file = open("Day5_test.txt", "r")
+test_file = open("test.txt", "r")
 
 orders = []
 updates = []
