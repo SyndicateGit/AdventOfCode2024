@@ -1,3 +1,5 @@
+from Day12_2 import connecting_letters
+
 f = open("Day12.txt", "r")
 t = open("test.txt", "r")
 
@@ -44,28 +46,25 @@ def diagonal_connections(i, j):
 
 def edges(i, j):
     letter = inputs[i][j]
-    connections = direct_connections(i, j)
-    diaganols = diagonal_connections(i, j)
-    edges = 0
 
+    # Not a corner but an edge
+    if i - 1 >= 0 and i + 1 < len(inputs) and inputs[i-1][j] == letter and inputs[i+1][j] == letter and j - 1 >= 0 and j + 1 < len(inputs[i]) and inputs[i][j-1] != letter and inputs[i][j+1] != letter:
+        return True
+    if j - 1 >= 0 and j + 1 < len(inputs[i]) and inputs[i][j-1] == letter and inputs[i][j+1] == letter and i - 1 >= 0 and i + 1 < len(inputs) and inputs[i-1][j] != letter and inputs[i+1][j] != letter:
+        return True
+    return False
 
-    if connections == 3 and diaganols == 1: # L shape corner
-        return 1
-
-    if connections + diaganols == 7: # Inner L shape corner
-        return 1
-
-    if connections == 1: # Singular edge
-        return 2
-
-
-
-    return edges
+def corners(i, j):
+    letter = inputs[i][j]
+    corners = 1
+    return corners
 
 def calc_sides(visited_perimeter):
     sides = 0 # sides = number of detected edges
     for i, j in visited_perimeter:
-        sides += edges(i, j)
+        if edges(i, j):
+            continue
+        sides += corners(i, j)
     return sides
 
 def calculate_area(i, j):
@@ -103,7 +102,6 @@ def calculate_area(i, j):
 
     perimeter = calc_sides(visited_perimeter)
     print(letter, area, perimeter)
-    print(visited_perimeter)
     return area * perimeter
 
 
