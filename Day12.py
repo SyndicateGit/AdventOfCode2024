@@ -1,5 +1,3 @@
-from Day12_2 import connecting_letters
-
 f = open("Day12.txt", "r")
 t = open("test.txt", "r")
 
@@ -18,7 +16,7 @@ total_price = 0
 
 visited = set()
 
-def direct_connections(i, j):
+def connecting_letters(i, j):
     letter = inputs[i][j]
     connections = 0
     if i - 1 >= 0 and inputs[i-1][j] == letter:
@@ -31,48 +29,13 @@ def direct_connections(i, j):
         connections += 1
     return connections
 
-def diagonal_connections(i, j):
-    letter = inputs[i][j]
-    connections = 0
-    if i - 1 >= 0 and j - 1 >= 0 and inputs[i-1][j-1] == letter:
-        connections += 1
-    if i - 1 >= 0 and j + 1 < len(inputs[i]) and inputs[i-1][j+1] == letter:
-        connections += 1
-    if i + 1 < len(inputs) and j - 1 >= 0 and inputs[i+1][j-1] == letter:
-        connections += 1
-    if i + 1 < len(inputs) and j + 1 < len(inputs[i]) and inputs[i+1][j+1] == letter:
-        connections += 1
-    return connections
-
-def edges(i, j):
-    letter = inputs[i][j]
-
-    # Not a corner but an edge
-    if i - 1 >= 0 and i + 1 < len(inputs) and inputs[i-1][j] == letter and inputs[i+1][j] == letter and j - 1 >= 0 and j + 1 < len(inputs[i]) and inputs[i][j-1] != letter and inputs[i][j+1] != letter:
-        return True
-    if j - 1 >= 0 and j + 1 < len(inputs[i]) and inputs[i][j-1] == letter and inputs[i][j+1] == letter and i - 1 >= 0 and i + 1 < len(inputs) and inputs[i-1][j] != letter and inputs[i+1][j] != letter:
-        return True
-    return False
-
-def corners(i, j):
-    letter = inputs[i][j]
-    corners = 1
-    return corners
-
-def calc_sides(visited_perimeter):
-    sides = 0 # sides = number of detected edges
-    for i, j in visited_perimeter:
-        if edges(i, j):
-            continue
-        sides += corners(i, j)
-    return sides
-
-def calculate_area(i, j):
+def calculate_plot(i, j):
     letter = inputs[i][j]
     area = 0
-    queue = [(i,j)]
     perimeter = 0
-    visited_perimeter = set()
+
+    queue = [(i,j)]
+
     # BFS explore and add to total area and total perimeter
     while queue:
         row, col = queue.pop(0)
@@ -81,8 +44,7 @@ def calculate_area(i, j):
 
         if inputs[row][col] == letter:
             area += 1
-            if(direct_connections(row, col) + diagonal_connections(row, col) < 8):
-                visited_perimeter.add((row, col))
+            perimeter += 4 - connecting_letters(row, col)
             visited.add((row, col))
         else:
             continue
@@ -99,16 +61,12 @@ def calculate_area(i, j):
 
         if col + 1 < len(inputs[row]) and (row, col+1) not in visited:
             queue.append((row, col+1))
-
-    perimeter = calc_sides(visited_perimeter)
-    print(letter, area, perimeter)
     return area * perimeter
-
 
 for i in range(len(inputs)):
     for j in range(len(inputs[i])):
         if (i, j) in visited: # Skip areas already visited
             continue
-        total_price += calculate_area(i, j)
+        total_price += calculate_plot(i, j)
 
 print(total_price)

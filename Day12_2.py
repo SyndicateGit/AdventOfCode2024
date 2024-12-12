@@ -29,16 +29,31 @@ def connecting_letters(i, j):
         connections += 1
     return connections
 
-def sides_discount():
-    return 0
+def diagonal_connections(i, j):
+    letter = inputs[i][j]
+    connections = 0
+    if i - 1 >= 0 and j - 1 >= 0 and inputs[i-1][j-1] == letter:
+        connections += 1
+    if i + 1 < len(inputs) and j + 1 < len(inputs[i]) and inputs[i+1][j+1] == letter:
+        connections += 1
+    if i - 1 >= 0 and j + 1 < len(inputs[i]) and inputs[i-1][j+1] == letter:
+        connections += 1
+    if i + 1 < len(inputs) and j - 1 >= 0 and inputs[i+1][j-1] == letter:
+        connections += 1
+    return connections
+
+def sides_discount(current_visited):
+    visited = set()
+
+
+    return len(visited)
 
 def calculate_plot(i, j):
     letter = inputs[i][j]
     area = 0
     perimeter = 0
-
     queue = [(i,j)]
-
+    current_visited = set()
     # BFS explore and add to total area and total perimeter
     while queue:
         row, col = queue.pop(0)
@@ -49,6 +64,7 @@ def calculate_plot(i, j):
             area += 1
             perimeter += 4 - connecting_letters(row, col)
             visited.add((row, col))
+            current_visited.add((row, col))
         else:
             continue
 
@@ -64,6 +80,8 @@ def calculate_plot(i, j):
 
         if col + 1 < len(inputs[row]) and (row, col+1) not in visited:
             queue.append((row, col+1))
+
+        perimeter -= sides_discount(current_visited)
     return area * perimeter
 
 for i in range(len(inputs)):
