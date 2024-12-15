@@ -9,7 +9,7 @@ def display(inputs):
     for row in inputs:
         print("".join(row))
 
-for line in t:
+for line in f:
     inputs.append([x for x in line.strip()])
 
 new_inputs = []
@@ -69,8 +69,9 @@ def can_box_move(grid, box, dir, move_list=set()):
     if (row, col) not in move_list:
         if grid[row][col] == "[":
             move_list.add((row, col))
-        else:
+        elif grid[row][col] == "]":
             move_list.add((row, col - 1))
+
     if above == "#":
         return False
     if above == ".": # Box can move
@@ -81,29 +82,25 @@ def can_box_move(grid, box, dir, move_list=set()):
             if above == grid[box[0]][box[1]]: # Consecutive box aligns, acts like part 1
                 if above == "[":
                     move_list.add((row + dr, col + dc))
-                    return can_box_move(grid, (row + dr, col + dc), dir) and can_box_move(grid, (row + dr, col + 1), dir)
+                    return can_box_move(grid, (row + dr, col + dc), dir, move_list) and can_box_move(grid, (row + dr, col + 1), dir, move_list)
                 else:
                     move_list.add((row + dr, col - 1))
-                    return can_box_move(grid, (row + dr, col - 1), dir) and can_box_move(grid, (row + dr, col + dc), dir)
+                    return can_box_move(grid, (row + dr, col - 1), dir, move_list) and can_box_move(grid, (row + dr, col + dc), dir, move_list)
 
             if above == "[":
                 if dir == "^":
                     move_list.add((row + dr, col + dc))
-                    move_list.add((row + dr, col + 1))
-                    return can_box_move(grid, (row + dr, col + dc), dir) and can_box_move(grid, (row + dr, col + 1), dir)
+                    return can_box_move(grid, (row + dr, col + dc), dir, move_list) and can_box_move(grid, (row + dr, col + 1), dir, move_list)
                 if dir == "v":
                     move_list.add((row + dr, col + dc))
-                    move_list.add((row + dr, col + 1))
-                    return can_box_move(grid, (row + dr, col + dc), dir) and can_box_move(grid, (row + dr, col + 1), dir)
+                    return can_box_move(grid, (row + dr, col + dc), dir, move_list) and can_box_move(grid, (row + dr, col + 1), dir, move_list)
             elif above == "]":
                 if dir == "^":
-                    move_list.add((row + dr, col + dc))
                     move_list.add((row + dr, col - 1))
-                    return can_box_move(grid, (row + dr, col + dc), dir) and can_box_move(grid, (row + dr, col - 1), dir)
+                    return can_box_move(grid, (row + dr, col + dc), dir, move_list) and can_box_move(grid, (row + dr, col - 1), dir, move_list)
                 if dir == "v":
-                    move_list.add((row + dr, col + dc))
                     move_list.add((row + dr, col - 1))
-                    return can_box_move(grid, (row + dr, col + dc), dir) and can_box_move(grid, (row + dr, col - 1), dir)
+                    return can_box_move(grid, (row + dr, col + dc), dir, move_list) and can_box_move(grid, (row + dr, col - 1), dir, move_list)
         else:
             if above != grid[box[0]][box[1]]: # Consecutive box aligns, acts like part 1
                 return can_box_move(grid, (row + dr, col + dc), dir)
@@ -178,6 +175,12 @@ def move(grid, robot, dir):
         if can_box_move(grid, (row + dr, col + dc), dir):
             grid[row][col] = "."
             if dir == "^" or dir == "v":
+                if grid[row + dr][col + dc] == "[" and not can_box_move(grid, (row + dr, col + dc + 1), dir):
+                    grid[row][col] = "@"
+                    return robot
+                if grid[row + dr][col + dc] == "]" and not can_box_move(grid, (row + dr, col + dc - 1), dir):
+                    grid[row][col] = "@"
+                    return robot
                 # Need to recursively move boxes
                 prev = grid[row + dr][col + dc]
                 move_boxes(grid, (row + dr, col + dc), dir)
