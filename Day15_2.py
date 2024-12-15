@@ -9,7 +9,7 @@ def display(inputs):
     for row in inputs:
         print("".join(row))
 
-for line in f:
+for line in t:
     inputs.append([x for x in line.strip()])
 
 new_inputs = []
@@ -144,8 +144,13 @@ def move_boxes(grid, box, dir):
             else:
                 new_move_list.add(box)
         print(new_move_list)
+
+        # Double check can move
+        for box in new_move_list:
+            if grid[box[0] + dr][box[1]] == "#" or grid[box[0] + dr][box[1] + 1] == "#":
+                return
         # White out all boxes
-        for box in move_list:
+        for box in new_move_list:
             grid[box[0]][box[1]] = "."
             grid[box[0]][box[1]+1] = "."
         # Draw boxes in new position
@@ -171,38 +176,20 @@ def move(grid, robot, dir):
     if grid[row + dr][col + dc] == "[" or grid[row + dr][col + dc] == "]": # Robot tries to move box
         # Needs to recursively check if box can move
         if can_box_move(grid, (row + dr, col + dc), dir):
-            if grid[row + dr][col + dc] == "[":
-                if can_box_move(grid, (row + dr, col + dc + 1), dir):
-                    grid[row][col] = "."
-                    if dir == "^" or dir == "v":
-                        # Need to recursively move boxes
-                        prev = grid[row + dr][col + dc]
-                        move_boxes(grid, (row + dr, col + dc), dir)
-                        if prev == "[":
-                            grid[row + dr][col + dc + 1] = "."
-                        else:
-                            grid[row + dr][col + dc - 1] = "."
-                        grid[row + dr][col + dc] = "@"
-                    else:
-                        grid[row + dr][col + dc] = "@"
-                        move_boxes(grid, (row + dr, col + dc), dir)
-                    return (row + dr, col + dc) # updated robot position
+            grid[row][col] = "."
+            if dir == "^" or dir == "v":
+                # Need to recursively move boxes
+                prev = grid[row + dr][col + dc]
+                move_boxes(grid, (row + dr, col + dc), dir)
+                if prev == "[":
+                    grid[row + dr][col + dc + 1] = "."
+                else:
+                    grid[row + dr][col + dc - 1] = "."
+                grid[row + dr][col + dc] = "@"
             else:
-                if can_box_move(grid, (row + dr, col + dc - 1), dir):
-                    grid[row][col] = "."
-                    if dir == "^" or dir == "v":
-                        # Need to recursively move boxes
-                        prev = grid[row + dr][col + dc]
-                        move_boxes(grid, (row + dr, col + dc), dir)
-                        if prev == "[":
-                            grid[row + dr][col + dc + 1] = "."
-                        else:
-                            grid[row + dr][col + dc - 1] = "."
-                        grid[row + dr][col + dc] = "@"
-                    else:
-                        grid[row + dr][col + dc] = "@"
-                        move_boxes(grid, (row + dr, col + dc), dir)
-                    return (row + dr, col + dc)
+                grid[row + dr][col + dc] = "@"
+                move_boxes(grid, (row + dr, col + dc), dir)
+            return (row + dr, col + dc) # updated robot position
         return robot
 
 def part1(robot, grid, inputs):
@@ -212,7 +199,7 @@ def part1(robot, grid, inputs):
         for c in line:
             print(c)
             robot = move(grid, robot, c)
-            print(robot)
+            display(grid)
 
 def score(grid):
     total = 0
