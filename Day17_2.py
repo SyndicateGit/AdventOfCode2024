@@ -54,8 +54,8 @@ def run_instruction(opcode, operand, i):
         registers[1] = registers[1] ^ registers[2]
     elif opcode == 5: # out
         output.append(combo_operand(operand)%8)
-        if output[-1]!=program[len(output)-1]:
-            return -1
+        # if output[-1]!=program[len(output)-1]:
+        #     return -1
     elif opcode == 6: # bdv
         numerator = registers[0]
         denominator = 2 ** combo_operand(operand)
@@ -74,14 +74,17 @@ def run_program(program):
         i = run_instruction(opcode, operand, i)
     return
 
-i = 0
-len_program = len(program)
-while True:
-    registers = [i, 0, 0]
-    output = []
-    run_program(program)
-    print(i)
-    if output == program:
-        print(i)
-        break
-    i += 1
+def calc_out(A):
+    return
+
+
+# Program: 2,4,1,1,7,5,4,7,1,4,0,3,5,5,3,0
+
+# B = A % 8
+# B = B ^ 1
+# C = A >> B # Bitshift B times to simulate dividing by 2**B
+# B = B ^ C
+# B = B ^ 4
+# A = A >> 3
+# out(B)
+# jnz(0)
