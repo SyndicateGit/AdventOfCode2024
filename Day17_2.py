@@ -1,3 +1,5 @@
+from Day17 import run_program
+
 f = open("Day17.txt", "r")
 t = open("test.txt", "r")
 
@@ -75,7 +77,34 @@ def run_program(program):
     return
 
 def calc_out(A):
-    return
+    output = []
+    while A != 0:
+        B = (A % 8) ^ 1
+        B = (B ^ (A>>B)) ^ 4
+        output.append(B%8)
+        # if B%8 != program[len(output)-1]:
+        #     return []
+        A = A >> 3
+    return output
+
+
+A = 2**45
+while True:
+    print(A)
+    result = calc_out(A)
+    print(result, program)
+    if len(result) > len(program):
+        raise ValueError("Something wrong")
+    if result == program:
+        print(A)
+        break
+
+    add = 0
+    for i in range(len(result) - 1, -1, -1):
+        if result[i] != program[i]:
+            add = 8**(i) # Add enough to change just that digit
+            A += add
+            break
 
 
 # Program: 2,4,1,1,7,5,4,7,1,4,0,3,5,5,3,0
@@ -86,5 +115,8 @@ def calc_out(A):
 # B = B ^ C
 # B = B ^ 4
 # A = A >> 3
-# out(B)
+# out(B%8)
 # jnz(0)
+
+# Out = ((A%8)^1)^(A>>((A%8)^1))^4
+# A = A >> 3
