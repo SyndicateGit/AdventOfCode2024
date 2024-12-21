@@ -40,15 +40,30 @@ def numeric_directions(input):
     for char in input:
         col, row = numeric_positions[char]
         diff_col, diff_row = col - curr[0], row - curr[1]
-        if diff_row < 0:
-            directions.append("^" * abs(diff_row))
+        horizontal = ""
+        vertical = ""
         if diff_col > 0:
-            directions.append(">" * abs(diff_col))
+            horizontal = ">" * diff_col
+        elif diff_col < 0:
+            horizontal = "<" * abs(diff_col)
+
         if diff_row > 0:
-            directions.append("v" * abs(diff_row))
-        if diff_col < 0:
-            directions.append("<" * abs(diff_col))
-        directions.append("A")
+            vertical = "v" * diff_row
+        elif diff_row < 0:
+            vertical = "^" * abs(diff_row)
+
+        # Check for gap
+        if numeric_keypad[curr[1]][curr[0] + diff_col] == " ":
+            directions.append(vertical+horizontal)
+            directions.append("A")
+        elif numeric_keypad[curr[1] + diff_row][curr[0]] == " ":
+            directions.append(horizontal+vertical)
+            directions.append("A")
+        else:
+            # Technically it should check for both combinations and see which path is shorter...
+            directions.append(horizontal + vertical)
+            directions.append("A")
+
         curr = (col, row)
     return "".join(directions)
 
@@ -60,9 +75,6 @@ def directional_directions(directions):
     for char in directions:
         col, row = directional_positions[char]
         diff_col, diff_row = col - curr[0], row - curr[1]
-        if char == directional_keypad[curr[1]][curr[0]]:
-            new_directions.append(char)
-            continue
         if char == "<":
             if diff_row > 0:
                 new_directions.append("v" * abs(diff_row))
