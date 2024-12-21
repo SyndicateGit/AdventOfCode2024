@@ -67,6 +67,39 @@ def numeric_directions(input):
         curr = (col, row)
     return "".join(directions)
 
+def numeric_directions2(input):
+    curr = numeric_positions["A"]
+    directions = []
+    for char in input:
+        col, row = numeric_positions[char]
+        diff_col, diff_row = col - curr[0], row - curr[1]
+        horizontal = ""
+        vertical = ""
+        if diff_col > 0:
+            horizontal = ">" * diff_col
+        elif diff_col < 0:
+            horizontal = "<" * abs(diff_col)
+
+        if diff_row > 0:
+            vertical = "v" * diff_row
+        elif diff_row < 0:
+            vertical = "^" * abs(diff_row)
+
+        # Check for gap
+        if numeric_keypad[curr[1]][curr[0] + diff_col] == " ":
+            directions.append(vertical + horizontal)
+            directions.append("A")
+        elif numeric_keypad[curr[1] + diff_row][curr[0]] == " ":
+            directions.append(horizontal + vertical)
+            directions.append("A")
+        else:
+            # Technically it should check for both combinations and see which path is shorter...
+            directions.append(vertical + horizontal)
+            directions.append("A")
+
+        curr = (col, row)
+    return "".join(directions)
+
 print(numeric_directions(inputs[4]))
 
 def directional_directions(directions):
@@ -126,13 +159,17 @@ def recursive_directions(input, n):
 # print(len(recursive_directions(numeric_directions(inputs[0]), 2)))
 
 def complexities(inputs):
-    count = 0
+    count1 = 0
+    count2 = 0
     for input in inputs:
         numeric = int(input[:-1])
         length = len(recursive_directions(numeric_directions(input), 2))
+        length2 = len(recursive_directions(numeric_directions2(input), 2))
         print(numeric, length)
-        count +=  length * numeric
-    return count
+        print(numeric, length2)
+        count1 +=  length * numeric
+        count2 += length2 * numeric
+    return count1, count2
 
 print(complexities(inputs))
 
