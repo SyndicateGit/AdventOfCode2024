@@ -1,3 +1,5 @@
+from collections import deque
+
 f = open("Day21.txt", "r")
 t = open("test.txt", "r")
 
@@ -33,15 +35,17 @@ directional_positions = {char: (x, y) for y, row in enumerate(directional_keypad
 # Function to find path of directional keypad given code
 # Recursively call function to find path of directional keypad given code with the code generated as new input
 
-# Note: For directional keypad, up and right are the shortest distance from A. Prioritize those directions first.
+# Note: Need all possible paths for each input
 def numeric_directions(input):
     curr = numeric_positions["A"]
-    directions = []
+    paths = [""]
+
     for char in input:
         col, row = numeric_positions[char]
         diff_col, diff_row = col - curr[0], row - curr[1]
         horizontal = ""
         vertical = ""
+
         if diff_col > 0:
             horizontal = ">" * diff_col
         elif diff_col < 0:
@@ -52,53 +56,25 @@ def numeric_directions(input):
         elif diff_row < 0:
             vertical = "^" * abs(diff_row)
 
-        # Check for gap
+        new_paths = []
+        # Check for gap and generate possible paths
         if numeric_keypad[curr[1]][curr[0] + diff_col] == " ":
-            directions.append(vertical+horizontal)
-            directions.append("A")
+            for path in paths:
+                new_paths.append(path + vertical + horizontal + "A")
         elif numeric_keypad[curr[1] + diff_row][curr[0]] == " ":
-            directions.append(horizontal+vertical)
-            directions.append("A")
+            for path in paths:
+                new_paths.append(path + horizontal + vertical + "A")
         else:
-            # Technically it should check for both combinations and see which path is shorter...
-            directions.append(horizontal + vertical)
-            directions.append("A")
+            for path in paths:
+                new_paths.append(path + horizontal + vertical + "A")
+                if horizontal + vertical != vertical + horizontal:
+                    new_paths.append(path + vertical + horizontal + "A")
 
+        paths = new_paths
         curr = (col, row)
-    return "".join(directions)
 
-def numeric_directions2(input):
-    curr = numeric_positions["A"]
-    directions = []
-    for char in input:
-        col, row = numeric_positions[char]
-        diff_col, diff_row = col - curr[0], row - curr[1]
-        horizontal = ""
-        vertical = ""
-        if diff_col > 0:
-            horizontal = ">" * diff_col
-        elif diff_col < 0:
-            horizontal = "<" * abs(diff_col)
+    return paths
 
-        if diff_row > 0:
-            vertical = "v" * diff_row
-        elif diff_row < 0:
-            vertical = "^" * abs(diff_row)
-
-        # Check for gap
-        if numeric_keypad[curr[1]][curr[0] + diff_col] == " ":
-            directions.append(vertical + horizontal)
-            directions.append("A")
-        elif numeric_keypad[curr[1] + diff_row][curr[0]] == " ":
-            directions.append(horizontal + vertical)
-            directions.append("A")
-        else:
-            # Technically it should check for both combinations and see which path is shorter...
-            directions.append(vertical + horizontal)
-            directions.append("A")
-
-        curr = (col, row)
-    return "".join(directions)
 
 print(numeric_directions(inputs[4]))
 
@@ -149,8 +125,7 @@ def decode(input):
             curr = (curr[0] + 1, curr[1])
     return "".join(directions)
 
-print(directional_directions(numeric_directions(inputs[3])))
-print(decode(decode("<v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A")))
+# print(decode(decode("<v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A")))
 def recursive_directions(input, n):
     if n == 0:
         return input
@@ -160,16 +135,16 @@ def recursive_directions(input, n):
 
 def complexities(inputs):
     count1 = 0
-    count2 = 0
     for input in inputs:
         numeric = int(input[:-1])
-        length = len(recursive_directions(numeric_directions(input), 2))
-        length2 = len(recursive_directions(numeric_directions2(input), 2))
-        print(numeric, length)
-        print(numeric, length2)
-        count1 +=  length * numeric
-        count2 += length2 * numeric
-    return count1, count2
+        paths = numeric_directions(input)
+        min_length = float("inf")
+        for path in paths:
+            length = len(recursive_directions(path, 2))
+            min_length = min (min_length, length)
+        print(numeric, min_length)
+        count1 +=  min_length * numeric
+    return count1
 
 print(complexities(inputs))
 
