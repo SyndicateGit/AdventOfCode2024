@@ -129,17 +129,38 @@ def decode(input):
     return "".join(directions)
 
 # print(decode(decode("<v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A")))
-def recursive_directions(input, n):
-    if n == 0:
-        return input
-    # Split input into sets of 2 directions and call directional_directions on each set
+
+@cache
+def new_directions(directions):
     new_directions = []
     prev = "A"
-    for i in range(0, len(input), 2):
-        current = input[i+1]
-        new_directions.extend(directional_directions(prev, input[i:i + 2]))
-        prev = current
-    return recursive_directions(tuple(new_directions), n - 1)
+    # Split input into sets of 2 directions and call directional_directions on each set
+    for i in range(0, len(directions), 2):
+        new_directions.extend(directional_directions(prev, directions[i:i + 2]))
+        prev = directions[i + 1]
+    return new_directions
+
+def recursive_directions(input, n):
+    print(n)
+    if n == 0:
+        return input
+
+    directions = new_directions(input)
+    return recursive_directions(tuple(directions), n - 1)
+
+cache = {}
+def iterative_directins(input, n):
+    prev = input
+    next = []
+    for i in range(n):
+        print(i)
+        if prev in cache:
+            next = cache[prev]
+            cache[prev] = next
+        else:
+            next = new_directions(prev)
+        prev = tuple(next)
+    return next
 
 # print(len(recursive_directions(numeric_directions(inputs[0]), 2)))
 
@@ -150,7 +171,7 @@ def complexities(inputs):
         paths = numeric_directions(input)
         min_length = float("inf")
         for path in paths:
-            length = len(recursive_directions(path, 23))
+            length = len(iterative_directins(path, 23))
             min_length = min (min_length, length)
         print(numeric, min_length)
         count1 +=  min_length * numeric
