@@ -1,4 +1,5 @@
 from collections import deque
+
 from functools import cache
 
 f = open("Day21.txt", "r")
@@ -76,58 +77,40 @@ def numeric_directions(input):
 
     return paths
 
-print(numeric_directions(inputs[0]))
+
+print(numeric_directions(inputs[4]))
 
 @cache
-def path_between_buttons(start, end):
-    start_col, start_row = start
-    end_col, end_row = end
-    diff_col, diff_row = end_col - start_col, end_row - start_row
-
-    path = []
-
-    if diff_col < 0:
-        path.append("<" * abs(diff_col))
-    elif diff_col > 0:
-        path.append(">" * diff_col)
-
-    if diff_row < 0:
-        path.append("^" * abs(diff_row))
-    elif diff_row > 0:
-        path.append("v" * diff_row)
-
-    return "".join(path)
-
-@cache
-def process_segment(segment):
-    if segment == "A":
-        return "A"
-    return directional_directions(segment)
-
-@cache
-def split_directions(input):
-    segments = []
-    current_segment = ""
-    for char in input:
-        current_segment += char
-        if char == "A":
-            segments.append(current_segment)
-            current_segment = ""
-    return segments
-
-@cache
-def directional_directions(directions):
+def directional_directions(prev_position, directions):
     new_directions = []
-    curr = directional_positions["A"]
-
+    curr = directional_positions[prev_position]
     for char in directions:
-        next_pos = directional_positions[char]
+        col, row = directional_positions[char]
+        diff_col, diff_row = col - curr[0], row - curr[1]
+        if char == "<":
+            if diff_row > 0:
+                new_directions.append("v" * abs(diff_row))
+            if diff_col < 0:
+                new_directions.append("<" * abs(diff_col))
+        else:
+            if diff_col < 0:
+                new_directions.append("<" * abs(diff_col))
+            if diff_row > 0:
+                new_directions.append("v" * abs(diff_row))
+        if directional_keypad[curr[1]][curr[0]] == "<":
+            if diff_col > 0:
+                new_directions.append(">" * abs(diff_col))
+            if diff_row < 0:
+                new_directions.append("^" * abs(diff_row))
+        else:
+            if diff_row < 0:
+                new_directions.append("^" * abs(diff_row))
+            if diff_col > 0:
+                new_directions.append(">" * abs(diff_col))
 
-        path = path_between_buttons(curr, next_pos)
-        new_directions.append(path + "A")
-
-        curr = next_pos
-    return "".join(new_directions)
+        new_directions.append("A")
+        curr = (col, row)
+    return  "".join(new_directions)
 
 def decode(input):
     curr = directional_positions["A"]
@@ -146,36 +129,32 @@ def decode(input):
     return "".join(directions)
 
 # print(decode(decode("<v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A")))
-@cache
 def recursive_directions(input, n):
-    print(n)
     if n == 0:
         return input
-    segments = split_directions(input)
-    process_segments = [process_segment(segment) for segment in segments]
-    result = "".join(process_segments)
-
-    return recursive_directions(result, n - 1)
+    # Split input into sets of 2 directions and call directional_directions on each set
+    new_directions = []
+    prev = "A"
+    for i in range(0, len(input), 2):
+        current = input[i+1]
+        new_directions.extend(directional_directions(prev, input[i:i + 2]))
+        prev = current
+    return recursive_directions(tuple(new_directions), n - 1)
 
 # print(len(recursive_directions(numeric_directions(inputs[0]), 2)))
 
 def complexities(inputs):
-    @cache
-    def evaluate_path(path, n):
-        return len(recursive_directions(path, n))
-
     count1 = 0
     for input in inputs:
         numeric = int(input[:-1])
         paths = numeric_directions(input)
         min_length = float("inf")
-
         for path in paths:
-            length = evaluate_path(path, 23)
-            min_length = min(min_length, length)
-
+            length = len(recursive_directions(path, 23))
+            min_length = min (min_length, length)
         print(numeric, min_length)
-        count1 += min_length * numeric
+        count1 +=  min_length * numeric
     return count1
+
 print(complexities(inputs))
 
