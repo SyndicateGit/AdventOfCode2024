@@ -1,7 +1,5 @@
 from collections import deque
 
-from functools import cache
-
 f = open("Day21.txt", "r")
 t = open("test.txt", "r")
 
@@ -80,10 +78,9 @@ def numeric_directions(input):
 
 print(numeric_directions(inputs[4]))
 
-@cache
-def directional_directions(prev_position, directions):
+def directional_directions(directions):
     new_directions = []
-    curr = directional_positions[prev_position]
+    curr = directional_positions["A"]
     for char in directions:
         col, row = directional_positions[char]
         diff_col, diff_row = col - curr[0], row - curr[1]
@@ -129,41 +126,24 @@ def decode(input):
     return "".join(directions)
 
 # print(decode(decode("<v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A")))
-
-@cache
-def new_directions(directions):
-    new_directions = []
-    prev = "A"
-    # Split input into sets of 2 directions and call directional_directions on each set
-    for i in range(0, len(directions), 2):
-        new_directions.extend(directional_directions(prev, directions[i:i + 2]))
-        prev = directions[i + 1]
-    return new_directions
-
-def recursive_directions(input, n):
-    print(n)
-    if n == 0:
-        return input
-
-    directions = new_directions(input)
-    return recursive_directions(tuple(directions), n - 1)
-
+# Do chunks of A
 cache = {}
-def iterative_directins(input, n):
-    prev = input
-    next = []
-    for i in range(n):
-        print(i)
-        if prev in cache:
-            next = cache[prev]
-            cache[prev] = next
-        else:
-            next = new_directions(prev)
-        prev = tuple(next)
-    return next
+
+def recursive_directions(path, n):
+    if n == 0:
+        return len(path)
+    total = 0
+
+    while path:
+        chunk = path[:path.index("A") + 1]
+        if (chunk, n) not in cache:
+            cache[(chunk, n)] = recursive_directions(directional_directions(chunk), n - 1)
+        path = path[len(chunk):]
+        total += cache[(chunk, n)]
+    return total
 
 # print(len(recursive_directions(numeric_directions(inputs[0]), 2)))
-
+# 2379451789590
 def complexities(inputs):
     count1 = 0
     for input in inputs:
@@ -171,7 +151,10 @@ def complexities(inputs):
         paths = numeric_directions(input)
         min_length = float("inf")
         for path in paths:
-            length = len(iterative_directins(path, 23))
+            length = 0
+            chunks = [chunk + "A" for chunk in path.split("A") if chunk]
+            for i in range(len(chunks)):
+                length += recursive_directions(chunks[i], 25)
             min_length = min (min_length, length)
         print(numeric, min_length)
         count1 +=  min_length * numeric
